@@ -6,6 +6,7 @@
 <title>Prague Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
   :root {
     --bg: #0e0d0b;
@@ -17,7 +18,6 @@
     --text: #e8e2d5;
     --muted: #7a7060;
     --white: #f5f0e8;
-
     --breakfast: #d4845a;
     --food: #7ab87a;
     --bar: #8b7fd4;
@@ -44,7 +44,6 @@
     text-align: center;
     overflow: hidden;
   }
-
   header::before {
     content: '';
     position: absolute;
@@ -52,9 +51,7 @@
     background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%);
     pointer-events: none;
   }
-
   .header-label {
-    font-family: 'DM Sans', sans-serif;
     font-size: 10px;
     font-weight: 500;
     letter-spacing: 0.3em;
@@ -64,7 +61,6 @@
     opacity: 0;
     animation: fadeUp 0.6s ease 0.1s forwards;
   }
-
   h1 {
     font-family: 'Playfair Display', serif;
     font-size: clamp(44px, 12vw, 72px);
@@ -75,12 +71,7 @@
     opacity: 0;
     animation: fadeUp 0.7s ease 0.2s forwards;
   }
-
-  h1 em {
-    font-style: italic;
-    color: var(--gold-light);
-  }
-
+  h1 em { font-style: italic; color: var(--gold-light); }
   .header-sub {
     margin-top: 12px;
     font-size: 13px;
@@ -89,15 +80,41 @@
     opacity: 0;
     animation: fadeUp 0.7s ease 0.35s forwards;
   }
-
   .divider {
-    width: 40px;
-    height: 1px;
+    width: 40px; height: 1px;
     background: var(--gold);
     margin: 20px auto 0;
     opacity: 0;
     animation: fadeIn 0.6s ease 0.5s forwards;
   }
+
+  /* VIEW TOGGLE */
+  .view-toggle {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 20px 16px 0;
+    overflow: hidden;
+    max-width: 568px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .view-btn {
+    flex: 1;
+    padding: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+  }
+  .view-btn.active { background: var(--surface2); color: var(--white); }
 
   /* FILTER TABS */
   .filters {
@@ -114,7 +131,6 @@
     -webkit-overflow-scrolling: touch;
   }
   .filters::-webkit-scrollbar { display: none; }
-
   .filter-btn {
     flex-shrink: 0;
     padding: 14px 14px;
@@ -131,173 +147,117 @@
     transition: color 0.2s, border-color 0.2s;
     white-space: nowrap;
   }
-
   .filter-btn:hover { color: var(--text); }
   .filter-btn.active { color: var(--white); border-bottom-color: var(--gold); }
 
-  /* MAIN CONTENT */
+  /* MAP VIEW */
+  #map-view {
+    display: none;
+    position: relative;
+    height: calc(100vh - 185px);
+    min-height: 420px;
+  }
+  #map-view.active { display: block; }
+  #map { width: 100%; height: 100%; }
+
+  /* MAP LEGEND */
+  .map-legend {
+    position: absolute;
+    bottom: 24px;
+    left: 12px;
+    z-index: 1000;
+    background: rgba(14,13,11,0.92);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    backdrop-filter: blur(8px);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .legend-item.dimmed { opacity: 0.3; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* LEAFLET POPUP OVERRIDE */
+  .leaflet-popup-content-wrapper {
+    background: #211f19 !important;
+    border: 1px solid #2e2b22 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.7) !important;
+    color: #e8e2d5 !important;
+  }
+  .leaflet-popup-tip { background: #211f19 !important; }
+  .leaflet-popup-content { margin: 13px 16px !important; min-width: 180px; }
+  .popup-name { font-size: 14px; font-weight: 500; color: #f5f0e8; margin-bottom: 4px; }
+  .popup-desc { font-size: 11px; color: #7a7060; line-height: 1.5; margin-bottom: 9px; }
+  .popup-link { font-size: 11px; font-weight: 500; color: #c9a84c; text-decoration: none; letter-spacing: 0.04em; }
+  .popup-link:hover { color: #e8c97a; }
+  .leaflet-container { background: #1a1812 !important; }
+  .leaflet-control-zoom a { background: #181713 !important; color: #e8e2d5 !important; border-color: #2e2b22 !important; }
+  .leaflet-control-zoom a:hover { background: #211f19 !important; }
+
+  /* LIST VIEW */
+  #list-view { display: block; }
   main {
     padding: 0 16px 80px;
     max-width: 600px;
     margin: 0 auto;
   }
-
-  /* SECTION */
   .section {
     margin-top: 40px;
     opacity: 0;
     animation: fadeUp 0.5s ease forwards;
   }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .section-icon {
-    font-size: 18px;
-    line-height: 1;
-  }
-
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 400;
-    color: var(--white);
-    letter-spacing: -0.01em;
-  }
-
-  .section-count {
-    font-size: 11px;
-    color: var(--muted);
-    margin-left: auto;
-    letter-spacing: 0.05em;
-  }
-
-  .section-line {
-    width: 100%;
-    height: 1px;
-    background: var(--border);
-    margin-bottom: 4px;
-  }
-
-  /* SUBSECTION */
-  .subsection-title {
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 20px 0 8px;
-    padding-left: 2px;
-  }
-
-  /* PLACE CARD */
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .section-icon { font-size: 18px; line-height: 1; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; color: var(--white); letter-spacing: -0.01em; }
+  .section-count { font-size: 11px; color: var(--muted); margin-left: auto; letter-spacing: 0.05em; }
+  .section-line { width: 100%; height: 1px; background: var(--border); margin-bottom: 4px; }
+  .subsection-title { font-size: 10px; font-weight: 500; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; padding-left: 2px; }
   .place-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
+    display: flex; align-items: flex-start; gap: 14px;
     padding: 14px 0;
     border-bottom: 1px solid var(--border);
-    text-decoration: none;
-    color: inherit;
+    text-decoration: none; color: inherit;
     transition: background 0.15s;
-    border-radius: 4px;
-    cursor: pointer;
+    border-radius: 4px; cursor: pointer;
   }
-
   .place-card:last-child { border-bottom: none; }
-
   .place-card:active { background: var(--surface); }
-
-  .card-dot {
-    flex-shrink: 0;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-top: 6px;
-  }
-
+  .card-dot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; }
   .card-body { flex: 1; min-width: 0; }
-
-  .card-name {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--white);
-    line-height: 1.3;
-  }
-
-  .card-desc {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 3px;
-    line-height: 1.5;
-  }
-
-  .card-arrow {
-    flex-shrink: 0;
-    color: var(--muted);
-    font-size: 14px;
-    margin-top: 2px;
-    transition: color 0.2s, transform 0.2s;
-  }
-
-  .place-card:active .card-arrow {
-    color: var(--gold);
-    transform: translateX(3px);
-  }
-
-  /* DOT COLORS */
+  .card-name { font-size: 15px; font-weight: 500; color: var(--white); line-height: 1.3; }
+  .card-desc { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .card-arrow { flex-shrink: 0; color: var(--muted); font-size: 14px; margin-top: 2px; transition: color 0.2s, transform 0.2s; }
+  .place-card:active .card-arrow { color: var(--gold); transform: translateX(3px); }
   .dot-breakfast { background: var(--breakfast); }
   .dot-food      { background: var(--food); }
   .dot-bar       { background: var(--bar); }
   .dot-club      { background: var(--club); }
   .dot-coffee    { background: var(--coffee); }
   .dot-place     { background: var(--place); }
-
-  /* HIDDEN STATE */
   .section.hidden { display: none; }
-  .place-card.hidden { display: none; }
 
-  /* EMPTY STATE */
-  .empty {
-    display: none;
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-    font-size: 14px;
-  }
-  .empty.show { display: block; }
+  footer { text-align: center; padding: 32px 24px; font-size: 11px; color: var(--border); letter-spacing: 0.1em; text-transform: uppercase; }
 
-  /* FOOTER */
-  footer {
-    text-align: center;
-    padding: 32px 24px;
-    font-size: 11px;
-    color: var(--border);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-
-  .section:nth-child(1) { animation-delay: 0.05s; }
-  .section:nth-child(2) { animation-delay: 0.10s; }
-  .section:nth-child(3) { animation-delay: 0.15s; }
-  .section:nth-child(4) { animation-delay: 0.20s; }
-  .section:nth-child(5) { animation-delay: 0.25s; }
-  .section:nth-child(6) { animation-delay: 0.30s; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .section:nth-child(1) { animation-delay:0.05s; }
+  .section:nth-child(2) { animation-delay:0.10s; }
+  .section:nth-child(3) { animation-delay:0.15s; }
+  .section:nth-child(4) { animation-delay:0.20s; }
+  .section:nth-child(5) { animation-delay:0.25s; }
+  .section:nth-child(6) { animation-delay:0.30s; }
 </style>
 </head>
 <body>
@@ -309,8 +269,12 @@
   <div class="divider"></div>
 </header>
 
-<!-- FILTER TABS -->
-<nav class="filters">
+<div class="view-toggle">
+  <button class="view-btn active" id="btn-list">☰&nbsp; List</button>
+  <button class="view-btn" id="btn-map">⊕&nbsp; Map</button>
+</div>
+
+<nav class="filters" id="filter-nav">
   <button class="filter-btn active" data-filter="all">All</button>
   <button class="filter-btn" data-filter="breakfast">🍳 Breakfast</button>
   <button class="filter-btn" data-filter="food">🍽️ Food</button>
@@ -320,378 +284,206 @@
   <button class="filter-btn" data-filter="place">🌿 Spots</button>
 </nav>
 
+<!-- MAP VIEW -->
+<div id="map-view">
+  <div id="map"></div>
+  <div class="map-legend" id="map-legend">
+    <div class="legend-item" data-cat="breakfast"><div class="legend-dot" style="background:#d4845a"></div>Breakfast</div>
+    <div class="legend-item" data-cat="food"><div class="legend-dot" style="background:#7ab87a"></div>Food</div>
+    <div class="legend-item" data-cat="coffee"><div class="legend-dot" style="background:#c9a84c"></div>Coffee</div>
+    <div class="legend-item" data-cat="bar"><div class="legend-dot" style="background:#8b7fd4"></div>Bar</div>
+    <div class="legend-item" data-cat="club"><div class="legend-dot" style="background:#d46b8e"></div>Club</div>
+    <div class="legend-item" data-cat="place"><div class="legend-dot" style="background:#5ab8c9"></div>Spots</div>
+  </div>
+</div>
+
+<!-- LIST VIEW -->
+<div id="list-view">
 <main>
 
-  <!-- BREAKFAST -->
   <div class="section" data-section="breakfast">
-    <div class="section-header">
-      <span class="section-icon">🍳</span>
-      <span class="section-title">Breakfast</span>
-      <span class="section-count">6 places</span>
-    </div>
+    <div class="section-header"><span class="section-icon">🍳</span><span class="section-title">Breakfast</span><span class="section-count">6 places</span></div>
     <div class="section-line"></div>
-
-    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJX1TinYWUC0cRlmmsOqgDOS0" target="_blank" rel="noopener">
-      <div class="card-dot dot-breakfast"></div>
-      <div class="card-body">
-        <div class="card-name">Srnky</div>
-        <div class="card-desc">Vinohrady go-to · gluten-free options, stunning porridge</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJQ0udaTaVC0cR5nC--p1mIL4" target="_blank" rel="noopener">
-      <div class="card-dot dot-breakfast"></div>
-      <div class="card-body">
-        <div class="card-name">Bistro Monk</div>
-        <div class="card-desc">Old Town · great avocado toast & coffee, expect queues</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJFdxr38GUC0cRBt4Vys9tIms" target="_blank" rel="noopener">
-      <div class="card-dot dot-breakfast"></div>
-      <div class="card-body">
-        <div class="card-name">Sisters Bistro v Dlouhé</div>
-        <div class="card-desc">Czech open-faced sandwiches (chlebíčky) done perfectly</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJ3z7df_yUC0cR8OZpTK9ymW8" target="_blank" rel="noopener">
-      <div class="card-dot dot-breakfast"></div>
-      <div class="card-body">
-        <div class="card-name">artic Bakehouse</div>
-        <div class="card-desc">Malá Strana · takeaway only, incredible pastries & croissants</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJ433WHqSUC0cR-hbWXbPMSuE" target="_blank" rel="noopener">
-      <div class="card-dot dot-breakfast"></div>
-      <div class="card-body">
-        <div class="card-name">Můj šálek kávy</div>
-        <div class="card-desc">Karlín legend · big portions, excellent iced matcha & brunch</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJ53FvMieVC0cRP3dCOYZ9w6w" target="_blank" rel="noopener">
-      <div class="card-dot dot-breakfast"></div>
-      <div class="card-body">
-        <div class="card-name">Místo Café</div>
-        <div class="card-desc">Letná neighbourhood · locals hang out, Turkish eggs are a must</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
+    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJX1TinYWUC0cRlmmsOqgDOS0" target="_blank" rel="noopener"><div class="card-dot dot-breakfast"></div><div class="card-body"><div class="card-name">Srnky</div><div class="card-desc">Vinohrady go-to · gluten-free options, stunning porridge</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJQ0udaTaVC0cR5nC--p1mIL4" target="_blank" rel="noopener"><div class="card-dot dot-breakfast"></div><div class="card-body"><div class="card-name">Bistro Monk</div><div class="card-desc">Old Town · great avocado toast & coffee, expect queues</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJFdxr38GUC0cRBt4Vys9tIms" target="_blank" rel="noopener"><div class="card-dot dot-breakfast"></div><div class="card-body"><div class="card-name">Sisters Bistro v Dlouhé</div><div class="card-desc">Czech open-faced sandwiches (chlebíčky) done perfectly</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJ3z7df_yUC0cR8OZpTK9ymW8" target="_blank" rel="noopener"><div class="card-dot dot-breakfast"></div><div class="card-body"><div class="card-name">artic Bakehouse</div><div class="card-desc">Malá Strana · takeaway only, incredible pastries & croissants</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJ433WHqSUC0cR-hbWXbPMSuE" target="_blank" rel="noopener"><div class="card-dot dot-breakfast"></div><div class="card-body"><div class="card-name">Můj šálek kávy</div><div class="card-desc">Karlín legend · big portions, excellent iced matcha & brunch</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="breakfast" href="https://www.google.com/maps/place/?q=place_id:ChIJ53FvMieVC0cRP3dCOYZ9w6w" target="_blank" rel="noopener"><div class="card-dot dot-breakfast"></div><div class="card-body"><div class="card-name">Místo Café</div><div class="card-desc">Letná neighbourhood · locals hang out, Turkish eggs are a must</div></div><div class="card-arrow">↗</div></a>
   </div>
 
-  <!-- FOOD -->
   <div class="section" data-section="food">
-    <div class="section-header">
-      <span class="section-icon">🍽️</span>
-      <span class="section-title">Food</span>
-      <span class="section-count">11 places</span>
-    </div>
+    <div class="section-header"><span class="section-icon">🍽️</span><span class="section-title">Food</span><span class="section-count">11 places</span></div>
     <div class="section-line"></div>
-
     <div class="subsection-title">Czech & Traditional</div>
-
-    <a class="place-card" data-cat="food" href="https://maps.app.goo.gl/MQzGsYTX29BVpc1MA" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">Lokál</div>
-        <div class="card-desc">The best Pilsner Urquell in Prague · classic Czech pub food · multiple locations, Dlouhá St is closest</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJvfeLMZOUC0cRExw8WMgKv4E" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">Kantýna</div>
-        <div class="card-desc">Butcher canteen in a converted bank vault · tartare is unmissable</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJJQeVZI-UC0cREeV8jNifDCs" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">Vinohradský Parlament</div>
-        <div class="card-desc">Beloved Vinohrady gastropub · Czech food elevated, great dumplings</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
+    <a class="place-card" data-cat="food" href="https://maps.app.goo.gl/MQzGsYTX29BVpc1MA" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">Lokál</div><div class="card-desc">The best Pilsner Urquell in Prague · classic Czech pub food · Dlouhá St is closest</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJvfeLMZOUC0cRExw8WMgKv4E" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">Kantýna</div><div class="card-desc">Butcher canteen in a converted bank vault · tartare is unmissable</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJJQeVZI-UC0cREeV8jNifDCs" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">Vinohradský Parlament</div><div class="card-desc">Beloved Vinohrady gastropub · Czech food elevated, great dumplings</div></div><div class="card-arrow">↗</div></a>
     <div class="subsection-title">Everything else</div>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJhULlwMWUC0cRBLJ-IpBfWv0" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">Mr.HotDoG</div>
-        <div class="card-desc">Holešovice · best hot dogs & sliders in town, craft beers</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJOWxRQuuVC0cR3sTg67EVQp0" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">BIG SMOKERS</div>
-        <div class="card-desc">Texas-style BBQ · brisket & ribs, homemade sauces · closed Mon–Tue</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJSxqFUB-VC0cR3L7i7uHgOh8" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">BON Fresh Ramen & Soba</div>
-        <div class="card-desc">Vinohrady · top ramen spot, try the duck soba</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJ1UI14KOUC0cRusXMeIpR260" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">Eska</div>
-        <div class="card-desc">Karlín · renowned bakery-restaurant, poached egg with truffle is legendary</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJ005R4MWUC0cR5tUhsgCP5CA" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">PIPCA</div>
-        <div class="card-desc">Milady Horákové · rotisserie chicken & mash, simple and perfect</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJnUmQaMmVC0cRoR7Abh3rT84" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">KRO</div>
-        <div class="card-desc">Vinohrady · izakaya-style ramen & chicken bowls, tiny & intimate</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJhULlwMWUC0cRBLJ-IpBfWv0" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">Mr.HotDoG</div><div class="card-desc">Holešovice · best hot dogs & sliders in town, craft beers</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJOWxRQuuVC0cR3sTg67EVQp0" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">BIG SMOKERS</div><div class="card-desc">Texas-style BBQ · brisket & ribs, homemade sauces · closed Mon–Tue</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJSxqFUB-VC0cR3L7i7uHgOh8" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">BON Fresh Ramen & Soba</div><div class="card-desc">Vinohrady · top ramen spot, try the duck soba</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJ1UI14KOUC0cRusXMeIpR260" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">Eska</div><div class="card-desc">Karlín · renowned bakery-restaurant, poached egg with truffle is legendary</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJ005R4MWUC0cR5tUhsgCP5CA" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">PIPCA</div><div class="card-desc">Milady Horákové · rotisserie chicken & mash, simple and perfect</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJnUmQaMmVC0cRoR7Abh3rT84" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">KRO</div><div class="card-desc">Vinohrady · izakaya-style ramen & chicken bowls, tiny & intimate</div></div><div class="card-arrow">↗</div></a>
     <div class="subsection-title">Pizza</div>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJCZlGiuqUC0cRbI2NYf9dwzo" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">Pizza Nuova</div>
-        <div class="card-desc">Upscale Italian near náměstí Republiky · book ahead</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJ85DtJl-VC0cRNVN3Ze58Viw" target="_blank" rel="noopener">
-      <div class="card-dot dot-food"></div>
-      <div class="card-body">
-        <div class="card-name">Slice Slice Baby Pizza Club</div>
-        <div class="card-desc">Holešovice · creative pizza, very small space, book ahead</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJCZlGiuqUC0cRbI2NYf9dwzo" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">Pizza Nuova</div><div class="card-desc">Upscale Italian near náměstí Republiky · book ahead</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="food" href="https://www.google.com/maps/place/?q=place_id:ChIJ85DtJl-VC0cRNVN3Ze58Viw" target="_blank" rel="noopener"><div class="card-dot dot-food"></div><div class="card-body"><div class="card-name">Slice Slice Baby Pizza Club</div><div class="card-desc">Holešovice · creative pizza, very small space, book ahead</div></div><div class="card-arrow">↗</div></a>
   </div>
 
-  <!-- COFFEE -->
   <div class="section" data-section="coffee">
-    <div class="section-header">
-      <span class="section-icon">☕</span>
-      <span class="section-title">Coffee</span>
-      <span class="section-count">4 places</span>
-    </div>
+    <div class="section-header"><span class="section-icon">☕</span><span class="section-title">Coffee</span><span class="section-count">4 places</span></div>
     <div class="section-line"></div>
-
-    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJvVOyprGUC0cRZctPMRKZjLE" target="_blank" rel="noopener">
-      <div class="card-dot dot-coffee"></div>
-      <div class="card-body">
-        <div class="card-name">Vnitroblock</div>
-        <div class="card-desc">Holešovice · huge industrial concept space, flower shop & bakery inside</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJF9rFUMSUC0cRT2VLKDag1jQ" target="_blank" rel="noopener">
-      <div class="card-dot dot-coffee"></div>
-      <div class="card-body">
-        <div class="card-name">Café Letka</div>
-        <div class="card-desc">Letná neighbourhood favourite · queue on weekends, French toast is excellent</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJfXW_l1SVC0cRcO_sBgARGjk" target="_blank" rel="noopener">
-      <div class="card-dot dot-coffee"></div>
-      <div class="card-body">
-        <div class="card-name">Kolektor</div>
-        <div class="card-desc">Holešovice · incredible miso latte & hummus, also cocktails in the evening</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJwbOybpWUC0cR0Ie0VH2PcqY" target="_blank" rel="noopener">
-      <div class="card-dot dot-coffee"></div>
-      <div class="card-body">
-        <div class="card-name">EMA Espresso Bar</div>
-        <div class="card-desc">Near Florenc · one of the best lattes in Prague, beautiful interior</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
+    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJvVOyprGUC0cRZctPMRKZjLE" target="_blank" rel="noopener"><div class="card-dot dot-coffee"></div><div class="card-body"><div class="card-name">Vnitroblock</div><div class="card-desc">Holešovice · huge industrial concept space, flower shop & bakery inside</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJF9rFUMSUC0cRT2VLKDag1jQ" target="_blank" rel="noopener"><div class="card-dot dot-coffee"></div><div class="card-body"><div class="card-name">Café Letka</div><div class="card-desc">Letná neighbourhood favourite · queue on weekends, French toast is excellent</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJfXW_l1SVC0cRcO_sBgARGjk" target="_blank" rel="noopener"><div class="card-dot dot-coffee"></div><div class="card-body"><div class="card-name">Kolektor</div><div class="card-desc">Holešovice · incredible miso latte & hummus, also cocktails in the evening</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="coffee" href="https://www.google.com/maps/place/?q=place_id:ChIJwbOybpWUC0cR0Ie0VH2PcqY" target="_blank" rel="noopener"><div class="card-dot dot-coffee"></div><div class="card-body"><div class="card-name">EMA Espresso Bar</div><div class="card-desc">Near Florenc · one of the best lattes in Prague, beautiful interior</div></div><div class="card-arrow">↗</div></a>
   </div>
 
-  <!-- BAR -->
   <div class="section" data-section="bar">
-    <div class="section-header">
-      <span class="section-icon">🍸</span>
-      <span class="section-title">Bar</span>
-      <span class="section-count">2 places</span>
-    </div>
+    <div class="section-header"><span class="section-icon">🍸</span><span class="section-title">Bar</span><span class="section-count">2 places</span></div>
     <div class="section-line"></div>
-
-    <a class="place-card" data-cat="bar" href="https://www.google.com/maps/place/?q=place_id:ChIJ40MYSsaUC0cRtGYFyRNOzCA" target="_blank" rel="noopener">
-      <div class="card-dot dot-bar"></div>
-      <div class="card-body">
-        <div class="card-name">Cobra</div>
-        <div class="card-desc">Milady Horákové · cool cocktail & wine bar, great food too · closed Sunday</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="bar" href="https://www.google.com/maps/place/?q=place_id:ChIJt337SuaVC0cRc-gh2_yR8Gs" target="_blank" rel="noopener">
-      <div class="card-dot dot-bar"></div>
-      <div class="card-body">
-        <div class="card-name">Forbina</div>
-        <div class="card-desc">Theatrical high-end cocktail bar · every drink has a story, go for the experience</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
+    <a class="place-card" data-cat="bar" href="https://www.google.com/maps/place/?q=place_id:ChIJ40MYSsaUC0cRtGYFyRNOzCA" target="_blank" rel="noopener"><div class="card-dot dot-bar"></div><div class="card-body"><div class="card-name">Cobra</div><div class="card-desc">Milady Horákové · cool cocktail & wine bar, great food too · closed Sunday</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="bar" href="https://www.google.com/maps/place/?q=place_id:ChIJt337SuaVC0cRc-gh2_yR8Gs" target="_blank" rel="noopener"><div class="card-dot dot-bar"></div><div class="card-body"><div class="card-name">Forbina</div><div class="card-desc">Theatrical high-end cocktail bar · every drink has a story, go for the experience</div></div><div class="card-arrow">↗</div></a>
   </div>
 
-  <!-- CLUB -->
   <div class="section" data-section="club">
-    <div class="section-header">
-      <span class="section-icon">🎵</span>
-      <span class="section-title">Club</span>
-      <span class="section-count">1 place</span>
-    </div>
+    <div class="section-header"><span class="section-icon">🎵</span><span class="section-title">Club</span><span class="section-count">1 place</span></div>
     <div class="section-line"></div>
-
-    <a class="place-card" data-cat="club" href="https://www.google.com/maps/place/?q=place_id:ChIJNfQI4sGUC0cRjBTuM2paVts" target="_blank" rel="noopener">
-      <div class="card-dot dot-club"></div>
-      <div class="card-body">
-        <div class="card-name">ROXY</div>
-        <div class="card-desc">Legendary Prague club & live music venue in Old Town · Fri–Sat nights</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
+    <a class="place-card" data-cat="club" href="https://www.google.com/maps/place/?q=place_id:ChIJNfQI4sGUC0cRjBTuM2paVts" target="_blank" rel="noopener"><div class="card-dot dot-club"></div><div class="card-body"><div class="card-name">ROXY</div><div class="card-desc">Legendary Prague club & live music venue in Old Town · Fri–Sat nights</div></div><div class="card-arrow">↗</div></a>
   </div>
 
-  <!-- PLACES -->
   <div class="section" data-section="place">
-    <div class="section-header">
-      <span class="section-icon">🌿</span>
-      <span class="section-title">Spots to hang</span>
-      <span class="section-count">7 places</span>
-    </div>
+    <div class="section-header"><span class="section-icon">🌿</span><span class="section-title">Spots to hang</span><span class="section-count">7 places</span></div>
     <div class="section-line"></div>
-
-    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:EitNLiBIb3LDoWtvdsOpLCBQcmFoYSA3LUhvbGXFoW92aWNlLCBDemVjaGlhIi4qLAoUChIJiRDMr96UC0cRiOhtDGyEINcSFAoSCX1gC5jDlAtHEa9fkpXvzucV" target="_blank" rel="noopener">
-      <div class="card-dot dot-place"></div>
-      <div class="card-body">
-        <div class="card-name">Milady Horákové</div>
-        <div class="card-desc">The main boulevard of Holešovice · lined with cafés, bars & restaurants</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJD2TlxPqUC0cRk0WbtYw2erM" target="_blank" rel="noopener">
-      <div class="card-dot dot-place"></div>
-      <div class="card-body">
-        <div class="card-name">Střelecký ostrov</div>
-        <div class="card-desc">Peaceful island in the Vltava · great escape from the city bustle</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJrS4zTP2UC0cRMI7zhXJrRX0" target="_blank" rel="noopener">
-      <div class="card-dot dot-place"></div>
-      <div class="card-body">
-        <div class="card-name">Petřín</div>
-        <div class="card-desc">Iconic wooded hill · observation tower, panoramic views, mirror maze</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJQXd5N1-UC0cR6L0K3Gl0xyY" target="_blank" rel="noopener">
-      <div class="card-dot dot-place"></div>
-      <div class="card-body">
-        <div class="card-name">Náplavka</div>
-        <div class="card-desc">Buzzing riverside embankment · boat bars, weekend farmers market</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJpfmOTNuUC0cR2dltacHD1JI" target="_blank" rel="noopener">
-      <div class="card-dot dot-place"></div>
-      <div class="card-body">
-        <div class="card-name">Letenské sady (Park Letná)</div>
-        <div class="card-desc">Favourite park with the best panoramic view over the entire city</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJ2QFPvc-UC0cR-yep7ub8N78" target="_blank" rel="noopener">
-      <div class="card-dot dot-place"></div>
-      <div class="card-body">
-        <div class="card-name">Stromovka</div>
-        <div class="card-desc">Royal park in Prague 7 · huge, flat & peaceful, great for running or cycling</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
-
-    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJ-53TmZqUC0cRiqnBgT93RXQ" target="_blank" rel="noopener">
-      <div class="card-dot dot-place"></div>
-      <div class="card-body">
-        <div class="card-name">Riegrovy sady</div>
-        <div class="card-desc">Classic Prague sunset spot · castle views, beer garden, very local vibe</div>
-      </div>
-      <div class="card-arrow">↗</div>
-    </a>
+    <a class="place-card" data-cat="place" href="https://maps.google.com/?q=Milady+Hor%C3%A1kov%C3%A9,+Praha" target="_blank" rel="noopener"><div class="card-dot dot-place"></div><div class="card-body"><div class="card-name">Milady Horákové</div><div class="card-desc">The main boulevard of Holešovice · lined with cafés, bars & restaurants</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJD2TlxPqUC0cRk0WbtYw2erM" target="_blank" rel="noopener"><div class="card-dot dot-place"></div><div class="card-body"><div class="card-name">Střelecký ostrov</div><div class="card-desc">Peaceful island in the Vltava · great escape from the city bustle</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJrS4zTP2UC0cRMI7zhXJrRX0" target="_blank" rel="noopener"><div class="card-dot dot-place"></div><div class="card-body"><div class="card-name">Petřín</div><div class="card-desc">Iconic wooded hill · observation tower, panoramic views, mirror maze</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJQXd5N1-UC0cR6L0K3Gl0xyY" target="_blank" rel="noopener"><div class="card-dot dot-place"></div><div class="card-body"><div class="card-name">Náplavka</div><div class="card-desc">Buzzing riverside embankment · boat bars, weekend farmers market</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJpfmOTNuUC0cR2dltacHD1JI" target="_blank" rel="noopener"><div class="card-dot dot-place"></div><div class="card-body"><div class="card-name">Letenské sady (Park Letná)</div><div class="card-desc">Favourite park with the best panoramic view over the entire city</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJ2QFPvc-UC0cR-yep7ub8N78" target="_blank" rel="noopener"><div class="card-dot dot-place"></div><div class="card-body"><div class="card-name">Stromovka</div><div class="card-desc">Royal park in Prague 7 · huge, flat & peaceful, great for running or cycling</div></div><div class="card-arrow">↗</div></a>
+    <a class="place-card" data-cat="place" href="https://www.google.com/maps/place/?q=place_id:ChIJ-53TmZqUC0cRiqnBgT93RXQ" target="_blank" rel="noopener"><div class="card-dot dot-place"></div><div class="card-body"><div class="card-name">Riegrovy sady</div><div class="card-desc">Classic Prague sunset spot · castle views, beer garden, very local vibe</div></div><div class="card-arrow">↗</div></a>
   </div>
-
-  <div class="empty" id="empty">Nothing here yet.</div>
 
 </main>
+</div>
 
 <footer>Praha · Made with ♥</footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  const sections   = document.querySelectorAll('.section');
+const PLACES = [
+  { name:"Srnky",                    cat:"breakfast", desc:"Vinohrady go-to · gluten-free options, stunning porridge",                       lat:50.075862, lng:14.440404, url:"https://www.google.com/maps/place/?q=place_id:ChIJX1TinYWUC0cRlmmsOqgDOS0" },
+  { name:"Bistro Monk",              cat:"breakfast", desc:"Old Town · great avocado toast & coffee, expect queues",                         lat:50.085906, lng:14.420025, url:"https://www.google.com/maps/place/?q=place_id:ChIJQ0udaTaVC0cR5nC--p1mIL4" },
+  { name:"Sisters Bistro v Dlouhé",  cat:"breakfast", desc:"Czech open-faced sandwiches (chlebíčky) done perfectly",                         lat:50.090807, lng:14.426962, url:"https://www.google.com/maps/place/?q=place_id:ChIJFdxr38GUC0cRBt4Vys9tIms" },
+  { name:"artic Bakehouse",          cat:"breakfast", desc:"Malá Strana · takeaway only, incredible pastries & croissants",                  lat:50.080374, lng:14.404468, url:"https://www.google.com/maps/place/?q=place_id:ChIJ3z7df_yUC0cR8OZpTK9ymW8" },
+  { name:"Můj šálek kávy",           cat:"breakfast", desc:"Karlín legend · big portions, excellent iced matcha & brunch",                   lat:50.093531, lng:14.455094, url:"https://www.google.com/maps/place/?q=place_id:ChIJ433WHqSUC0cR-hbWXbPMSuE" },
+  { name:"Místo Café",               cat:"breakfast", desc:"Letná neighbourhood · locals hang out, Turkish eggs are a must",                 lat:50.099056, lng:14.404450, url:"https://www.google.com/maps/place/?q=place_id:ChIJ53FvMieVC0cRP3dCOYZ9w6w" },
+  { name:"Lokál",                    cat:"food",      desc:"The best Pilsner Urquell in Prague · classic Czech pub food",                    lat:50.090693, lng:14.425757, url:"https://maps.app.goo.gl/MQzGsYTX29BVpc1MA" },
+  { name:"Kantýna",                  cat:"food",      desc:"Butcher canteen in a converted bank vault · tartare is unmissable",              lat:50.083504, lng:14.428919, url:"https://www.google.com/maps/place/?q=place_id:ChIJvfeLMZOUC0cRExw8WMgKv4E" },
+  { name:"Vinohradský Parlament",    cat:"food",      desc:"Beloved Vinohrady gastropub · Czech food elevated, great dumplings",             lat:50.075423, lng:14.438329, url:"https://www.google.com/maps/place/?q=place_id:ChIJJQeVZI-UC0cREeV8jNifDCs" },
+  { name:"Mr.HotDoG",                cat:"food",      desc:"Holešovice · best hot dogs & sliders in town, craft beers",                      lat:50.099493, lng:14.427781, url:"https://www.google.com/maps/place/?q=place_id:ChIJhULlwMWUC0cRBLJ-IpBfWv0" },
+  { name:"BIG SMOKERS",              cat:"food",      desc:"Texas-style BBQ · brisket & ribs, homemade sauces · closed Mon–Tue",             lat:50.103031, lng:14.450926, url:"https://www.google.com/maps/place/?q=place_id:ChIJOWxRQuuVC0cR3sTg67EVQp0" },
+  { name:"BON Fresh Ramen & Soba",   cat:"food",      desc:"Vinohrady · top ramen spot, try the duck soba",                                  lat:50.076233, lng:14.436531, url:"https://www.google.com/maps/place/?q=place_id:ChIJSxqFUB-VC0cR3L7i7uHgOh8" },
+  { name:"Eska",                     cat:"food",      desc:"Karlín · renowned bakery-restaurant, poached egg with truffle is legendary",      lat:50.091382, lng:14.454574, url:"https://www.google.com/maps/place/?q=place_id:ChIJ1UI14KOUC0cRusXMeIpR260" },
+  { name:"PIPCA",                    cat:"food",      desc:"Milady Horákové · rotisserie chicken & mash, simple and perfect",                 lat:50.099677, lng:14.429157, url:"https://www.google.com/maps/place/?q=place_id:ChIJ005R4MWUC0cR5tUhsgCP5CA" },
+  { name:"KRO",                      cat:"food",      desc:"Vinohrady · izakaya-style ramen & chicken bowls, tiny & intimate",               lat:50.078637, lng:14.450666, url:"https://www.google.com/maps/place/?q=place_id:ChIJnUmQaMmVC0cRoR7Abh3rT84" },
+  { name:"Pizza Nuova",              cat:"food",      desc:"Upscale Italian near náměstí Republiky · book ahead",                            lat:50.089502, lng:14.427794, url:"https://www.google.com/maps/place/?q=place_id:ChIJCZlGiuqUC0cRbI2NYf9dwzo" },
+  { name:"Slice Slice Baby",         cat:"food",      desc:"Holešovice · creative pizza, very small space, book ahead",                      lat:50.103302, lng:14.447195, url:"https://www.google.com/maps/place/?q=place_id:ChIJ85DtJl-VC0cRNVN3Ze58Viw" },
+  { name:"Vnitroblock",              cat:"coffee",    desc:"Holešovice · huge industrial concept space, flower shop & bakery inside",        lat:50.101940, lng:14.449329, url:"https://www.google.com/maps/place/?q=place_id:ChIJvVOyprGUC0cRZctPMRKZjLE" },
+  { name:"Café Letka",               cat:"coffee",    desc:"Letná neighbourhood favourite · queue on weekends, French toast is excellent",   lat:50.098240, lng:14.425372, url:"https://www.google.com/maps/place/?q=place_id:ChIJF9rFUMSUC0cRT2VLKDag1jQ" },
+  { name:"Kolektor",                 cat:"coffee",    desc:"Holešovice · incredible miso latte & hummus, also cocktails in the evening",     lat:50.101080, lng:14.432799, url:"https://www.google.com/maps/place/?q=place_id:ChIJfXW_l1SVC0cRcO_sBgARGjk" },
+  { name:"EMA Espresso Bar",         cat:"coffee",    desc:"Near Florenc · one of the best lattes in Prague, beautiful interior",            lat:50.088728, lng:14.433502, url:"https://www.google.com/maps/place/?q=place_id:ChIJwbOybpWUC0cR0Ie0VH2PcqY" },
+  { name:"Cobra",                    cat:"bar",       desc:"Milady Horákové · cool cocktail & wine bar · closed Sunday",                    lat:50.099200, lng:14.432115, url:"https://www.google.com/maps/place/?q=place_id:ChIJ40MYSsaUC0cRtGYFyRNOzCA" },
+  { name:"Forbina",                  cat:"bar",       desc:"Theatrical high-end cocktail bar · every drink has a story",                    lat:50.081526, lng:14.413702, url:"https://www.google.com/maps/place/?q=place_id:ChIJt337SuaVC0cRc-gh2_yR8Gs" },
+  { name:"ROXY",                     cat:"club",      desc:"Legendary Prague club & live music venue in Old Town · Fri–Sat nights",          lat:50.090689, lng:14.425874, url:"https://www.google.com/maps/place/?q=place_id:ChIJNfQI4sGUC0cRjBTuM2paVts" },
+  { name:"Milady Horákové",          cat:"place",     desc:"The main boulevard of Holešovice · lined with cafés, bars & restaurants",       lat:50.099873, lng:14.427122, url:"https://maps.google.com/?q=Milady+Hor%C3%A1kov%C3%A9,+Praha" },
+  { name:"Střelecký ostrov",         cat:"place",     desc:"Peaceful island in the Vltava · great escape from the city bustle",              lat:50.081952, lng:14.410329, url:"https://www.google.com/maps/place/?q=place_id:ChIJD2TlxPqUC0cRk0WbtYw2erM" },
+  { name:"Petřín",                   cat:"place",     desc:"Iconic wooded hill · observation tower, panoramic views, mirror maze",           lat:50.081389, lng:14.393889, url:"https://www.google.com/maps/place/?q=place_id:ChIJrS4zTP2UC0cRMI7zhXJrRX0" },
+  { name:"Náplavka",                 cat:"place",     desc:"Buzzing riverside embankment · boat bars, weekend farmers market",               lat:50.069773, lng:14.414648, url:"https://www.google.com/maps/place/?q=place_id:ChIJQXd5N1-UC0cR6L0K3Gl0xyY" },
+  { name:"Letenské sady",            cat:"place",     desc:"Favourite park with the best panoramic view over the entire city",               lat:50.096529, lng:14.419671, url:"https://www.google.com/maps/place/?q=place_id:ChIJpfmOTNuUC0cR2dltacHD1JI" },
+  { name:"Stromovka",                cat:"place",     desc:"Royal park in Prague 7 · huge, flat & peaceful, great for running",              lat:50.106329, lng:14.419129, url:"https://www.google.com/maps/place/?q=place_id:ChIJ2QFPvc-UC0cR-yep7ub8N78" },
+  { name:"Riegrovy sady",            cat:"place",     desc:"Classic Prague sunset spot · castle views, beer garden, very local vibe",        lat:50.080284, lng:14.441561, url:"https://www.google.com/maps/place/?q=place_id:ChIJ-53TmZqUC0cRiqnBgT93RXQ" },
+];
 
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+const CAT_COLOR = { breakfast:'#d4845a', food:'#7ab87a', coffee:'#c9a84c', bar:'#8b7fd4', club:'#d46b8e', place:'#5ab8c9' };
 
-      const f = btn.dataset.filter;
-      sections.forEach(sec => {
-        if (f === 'all' || sec.dataset.section === f) {
-          sec.classList.remove('hidden');
-        } else {
-          sec.classList.add('hidden');
-        }
-      });
-    });
+function makeIcon(color) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34" viewBox="0 0 26 34">
+    <path d="M13 0C5.82 0 0 5.82 0 13c0 8.67 13 21 13 21S26 21.67 26 13C26 5.82 20.18 0 13 0z" fill="${color}"/>
+    <circle cx="13" cy="13" r="5" fill="white" opacity="0.85"/>
+  </svg>`;
+  return L.divIcon({ html: svg, className:'', iconSize:[26,34], iconAnchor:[13,34], popupAnchor:[0,-34] });
+}
+
+let mapReady = false, leafMap, markers = [];
+
+function initMap() {
+  if (mapReady) return;
+  mapReady = true;
+  leafMap = L.map('map', { center:[50.088, 14.428], zoom:13 });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution:'© <a href="https://carto.com/" style="color:#7a7060">CARTO</a>',
+    subdomains:'abcd', maxZoom:19
+  }).addTo(leafMap);
+
+  PLACES.forEach(p => {
+    const m = L.marker([p.lat, p.lng], { icon: makeIcon(CAT_COLOR[p.cat]) })
+      .addTo(leafMap)
+      .bindPopup(`<div class="popup-name">${p.name}</div><div class="popup-desc">${p.desc}</div><a class="popup-link" href="${p.url}" target="_blank" rel="noopener">Open in Maps ↗</a>`, { maxWidth:230 });
+    m._cat = p.cat;
+    markers.push(m);
   });
+}
+
+// View toggle
+const btnList  = document.getElementById('btn-list');
+const btnMap   = document.getElementById('btn-map');
+const listView = document.getElementById('list-view');
+const mapView  = document.getElementById('map-view');
+const filterNav= document.getElementById('filter-nav');
+
+btnList.addEventListener('click', () => {
+  btnList.classList.add('active'); btnMap.classList.remove('active');
+  listView.style.display = 'block';
+  mapView.classList.remove('active');
+  filterNav.style.display = 'flex';
+});
+btnMap.addEventListener('click', () => {
+  btnMap.classList.add('active'); btnList.classList.remove('active');
+  listView.style.display = 'none';
+  mapView.classList.add('active');
+  filterNav.style.display = 'none';
+  initMap();
+  setTimeout(() => leafMap && leafMap.invalidateSize(), 60);
+});
+
+// List filter
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.section').forEach(s => s.classList.toggle('hidden', f !== 'all' && s.dataset.section !== f));
+  });
+});
+
+// Map legend filter
+let activeCat = null;
+document.querySelectorAll('.legend-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const cat = item.dataset.cat;
+    if (activeCat === cat) {
+      activeCat = null;
+      markers.forEach(m => { m.setOpacity(1); m.setZIndexOffset(0); });
+      document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('dimmed'));
+    } else {
+      activeCat = cat;
+      markers.forEach(m => { const on = m._cat === cat; m.setOpacity(on ? 1 : 0.15); m.setZIndexOffset(on ? 500 : 0); });
+      document.querySelectorAll('.legend-item').forEach(i => i.classList.toggle('dimmed', i.dataset.cat !== cat));
+    }
+  });
+});
 </script>
 </body>
 </html>
