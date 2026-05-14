@@ -37,62 +37,13 @@
     overflow-x: hidden;
   }
 
-  header {
-    position: relative;
-    padding: 52px 24px 36px;
-    text-align: center;
-    overflow: hidden;
-  }
-  header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.18) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .header-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 14px;
-    opacity: 0;
-    animation: fadeUp 0.6s ease 0.1s forwards;
-  }
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(44px, 12vw, 72px);
-    font-weight: 400;
-    color: var(--white);
-    line-height: 1.0;
-    letter-spacing: -0.02em;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.2s forwards;
-  }
-  h1 em { font-style: italic; color: var(--gold-light); }
-  .header-sub {
-    margin-top: 12px;
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    opacity: 0;
-    animation: fadeUp 0.7s ease 0.35s forwards;
-  }
-  .divider {
-    width: 40px; height: 1px;
-    background: var(--gold);
-    margin: 20px auto 0;
-    opacity: 0;
-    animation: fadeIn 0.6s ease 0.5s forwards;
-  }
 
   .view-toggle {
     display: flex;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    margin: 20px 16px 0;
+    margin: 14px 16px 0;
     overflow: hidden;
     max-width: 568px;
     margin-left: auto;
@@ -151,7 +102,7 @@
   #map-view {
     display: none;
     position: relative;
-    height: calc(100vh - 185px);
+    height: calc(100vh - 54px);
     min-height: 520px;
   }
   #map-view.active { display: block; }
@@ -159,12 +110,12 @@
 
   .map-panel {
     position: absolute;
-    top: 12px;
+    bottom: 12px;
     left: 12px;
     z-index: 1000;
-    width: min(340px, calc(100vw - 24px));
-    max-height: calc(100% - 24px);
-    overflow: auto;
+    width: min(520px, calc(100vw - 24px));
+    max-height: calc(100vh - 82px);
+    overflow: hidden;
     background: rgba(255,250,241,0.95);
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -176,16 +127,16 @@
     top: 0;
     background: rgba(255,250,241,0.98);
     z-index: 2;
-    padding: 12px 14px;
+    padding: 9px 12px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
   }
   .panel-title {
     font-family: 'Playfair Display', serif;
-    font-size: 19px;
+    font-size: 17px;
     color: var(--white);
   }
   .panel-actions {
@@ -213,8 +164,8 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
+    gap: 8px;
+    padding: 8px 12px;
     background: transparent;
     border: 0;
     text-align: left;
@@ -224,10 +175,10 @@
   }
   .legend-row.off { opacity: 0.42; }
   .legend-checkbox {
-    width: 17px;
-    height: 17px;
+    width: 15px;
+    height: 15px;
     border: 1px solid var(--border);
-    border-radius: 5px;
+    border-radius: 4px;
     background: var(--surface);
     position: relative;
     flex-shrink: 0;
@@ -243,12 +194,14 @@
     font-weight: 700;
   }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .legend-label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-  .legend-count { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .legend-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .legend-count { margin-left: auto; font-size: 10px; color: var(--muted); }
   .legend-names {
-    padding: 0 14px 12px 51px;
+    padding: 0 12px 8px 43px;
     display: grid;
-    gap: 6px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 10px;
+    row-gap: 3px;
   }
   .legend-group.off .legend-names { display: none; }
   .pin-name {
@@ -256,11 +209,14 @@
     border: 0;
     color: var(--muted);
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    line-height: 1.35;
+    font-size: 10.5px;
+    line-height: 1.2;
     text-align: left;
     cursor: pointer;
-    padding: 2px 0;
+    padding: 1px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .pin-name:hover { color: var(--white); }
 
@@ -319,19 +275,22 @@
 
   @media (max-width: 720px) {
     #map-view {
-      height: calc(100vh - 160px);
-      min-height: 560px;
+      height: calc(100vh - 54px);
+      min-height: 520px;
     }
     .map-panel {
-      top: auto;
-      bottom: 12px;
-      max-height: 46%;
-      border-radius: 18px;
+      bottom: 10px;
+      left: 10px;
+      width: calc(100vw - 20px);
+      max-height: calc(100vh - 78px);
+      border-radius: 16px;
     }
     .legend-names {
-      grid-template-columns: 1fr 1fr;
-      column-gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 8px;
+      padding-left: 39px;
     }
+    .pin-name { font-size: 10px; }
   }
 
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
@@ -340,21 +299,14 @@
 </head>
 <body>
 
-<header>
-  <div class="header-label">A local's guide</div>
-  <h1>Praha<br><em>Guide</em></h1>
-  <p class="header-sub" id="header-sub">31 places · 6 categories</p>
-  <div class="divider"></div>
-</header>
-
 <div class="view-toggle">
-  <button class="view-btn active" id="btn-list">☰&nbsp; List</button>
-  <button class="view-btn" id="btn-map">⊕&nbsp; Map</button>
+  <button class="view-btn" id="btn-list">☰&nbsp; List</button>
+  <button class="view-btn active" id="btn-map">⊕&nbsp; Map</button>
 </div>
 
-<nav class="filters" id="filter-nav"></nav>
+<nav class="filters" id="filter-nav" style="display:none"></nav>
 
-<div id="map-view">
+<div id="map-view" class="active">
   <div id="map"></div>
   <aside class="map-panel" id="map-panel">
     <div class="panel-head">
@@ -368,7 +320,7 @@
   </aside>
 </div>
 
-<div id="list-view">
+<div id="list-view" style="display:none">
   <main id="place-list"></main>
 </div>
 
@@ -612,10 +564,11 @@ btnMap.addEventListener('click', () => {
 document.getElementById('show-all').addEventListener('click', () => setAllCategories(true));
 document.getElementById('hide-all').addEventListener('click', () => setAllCategories(false));
 
-document.getElementById('header-sub').textContent = `${PLACES.length} places · ${CATEGORIES.length} categories`;
 renderFilters();
 renderList();
 renderLegend();
+initMap();
+setTimeout(() => leafMap && leafMap.invalidateSize(), 80);
 </script>
 </body>
 </html>
